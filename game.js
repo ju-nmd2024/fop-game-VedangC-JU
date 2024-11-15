@@ -7,6 +7,7 @@ let gravity = 0.01;                         // Gravity pulling downwards
 let fuel = 100;                             // Fuel limit
 let isLanded = false;
 let isCrashed = false;
+let showRestartButton = false;
 
 // Movement flags for thrusting directions
 let thrustingUp = false;
@@ -14,21 +15,27 @@ let thrustingDown = false;
 let thrustingLeft = false;
 let thrustingRight = false;
 
+// Array for stars, smoke particles
+let stars = [];
+
 function setup() {
   createCanvas(700, 700);
   resetGame();
+  generateStars();                          // Generating the stars for background
 }
 
 function draw() {
-  background(0);
-  
-  // Draw landing pad
-  drawLandingPad();
+  background(20);
+  drawStars();                              // Drawing a starry background
+  drawTerrain();                            // Drawaing a terrain
+  drawLandingPad();                         // Drawing a landing pad
+
 
   // Check if the game is over (either landed or crashed)
   if (isLanded || isCrashed) {
     displayEndMessage();
-    return;
+    if (showRestartButton) drawRestartButton();     // Showing the restart button
+    return;                                         // Breaking the draw loop when landed or crashed
   }
 
   // Apply gravity to the rocket
@@ -83,30 +90,70 @@ function resetGame() {
   fuel = 100;                                     // Reset fuel
 }
 
+function generateStars() {
+  // Create stars for background
+  for (let i = 0; i < 500; i++) {
+    stars.push({
+      x: random(width),                           // Random x-position
+      y: random(height / 2),                      // Random y-position in upper half
+      size: random(1, 3)                          // Random size
+    });
+  }
+}
+
+function drawStars() {
+  // Draw each star
+  fill(255);
+  noStroke();
+  for (let star of stars) {
+    ellipse(star.x, star.y, star.size);
+  }
+}
+
 function drawRocket(x, y, isThrusting) {
   // Rocket Body
   fill(255, 0, 0);
   stroke(255);
-  rect(x - 10, y - 30, 20, 60, 5);                          // Main rocket body
+  rect(x - 10, y - 30, 20, 60, 5);                                // Main rocket body
 
   // Rocket Tip
   fill(255, 150, 150);
-  triangle(x - 10, y - 30, x + 10, y - 30, x, y - 50);      // Rocket top
+  triangle(x - 10, y - 30, x + 10, y - 30, x, y - 50);            // Rocket top
 
   // Rocket Fins
   fill(0, 0, 255);
-  rect(x - 12, y + 30, 6, 12);                              // Left fin
-  rect(x + 6, y + 30, 6, 12);                               // Right fin
+  rect(x - 12, y + 30, 6, 12);                                    // Left fin
+  rect(x + 6, y + 30, 6, 12);                                     // Right fin
   
   // Rocket Flame
   if (isThrusting) {
-    let flameLength = map(abs(vy), 0, 5, 10, 30);           // Flame length based on velocity
+    let flameLength = map(abs(vy), 0, 5, 10, 30);                 // Flame length based on velocity
     fill(255, 165, 0);
-    ellipse(x, y + 45, 10, flameLength);                    // Flame
+    ellipse(x, y + 45, 10, flameLength);                          // Flame
     
     fill(255, 100, 0);
     ellipse(x, y + 45 + flameLength / 2, 6, flameLength / 2);     // Inner flame
   }
+}
+
+function drawTerrain() {
+  // Draw the terrain with height adjustment
+  fill(50, 50, 50);
+  noStroke();
+  beginShape();
+  vertex(0, height);
+  vertex(0, height - 70);
+  vertex(60, height - 50);
+  vertex(50, height - 40);
+  vertex(250, height - 60);
+  vertex(350, height - 10);
+  vertex(400, height - 40);
+  vertex(450, height - 20);
+  vertex(500, height - 50);
+  vertex(550, height - 30);
+  vertex(600, height - 20);
+  vertex(650, height);
+  endShape(CLOSE);
 }
 
 // Draw a landing pad with supports and connectors
@@ -130,6 +177,7 @@ function checkLandingOrCrash() {
     } else {
       isCrashed = true;                                         // Rocket crashed
     }
+    showRestartButton = true;                                   // Button appears after landing or crashing
   }
 }
 
@@ -167,4 +215,23 @@ function keyReleased() {
   if (keyCode === DOWN_ARROW) thrustingDown = false;
   if (keyCode === LEFT_ARROW) thrustingLeft = false;
   if (keyCode === RIGHT_ARROW) thrustingRight = false;
+}
+
+function drawRestartButton() {
+  // Draw restart button to reset game
+  fill(255, 0, 0);
+  rect(width / 2 - 50, height / 2 + 40, 100, 40, 10);
+  fill(255);
+  textSize(20);
+  textAlign(CENTER, CENTER);
+  text("Restart", width / 2, height / 2 + 60);
+}
+
+function mousePressed() {
+  // Reset game if restart button is clicked
+  if (showRestartButton && mouseX > width / 2 - 50 && mouseX < width / 2 + 50 &&
+      mouseY > height / 2 + 40 && mouseY < height / 2 + 80) {
+    resetGame();
+    showRestartButton = false;          // To Hide the button after restarting
+  }
 }
