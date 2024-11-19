@@ -9,7 +9,7 @@ let isLanded = false;                 // Flag for successful landing
 let isCrashed = false;                // Flag for crash
 let showRestartButton = false;        // Flag to display restart button
 let showStartScreen = true;           // Flag for start screen
-
+// test
 // Flags for movement directions
 let thrustingUp = false;
 let thrustingDown = false;
